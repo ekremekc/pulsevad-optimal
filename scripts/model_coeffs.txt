@@ -1,0 +1,1 @@
+{"Diameter": 2.3333333333333353, "Coating_Carbothane": 1.2750000000000017, "Coating_Pellethane": 2.2750000000000012, "Coating_polyurethane": -0.12500000000000222, "Coating_soft_silicone": -3.4250000000000007}
