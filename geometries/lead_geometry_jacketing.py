@@ -47,19 +47,19 @@ N_signal = 13
 # Power cables
 # 22 AWG
 r_power = 1.70/2 * 1E-3 #m
-t_power = 0.49 * 1E-3 #m
-r_copper_power = r_power-t_power/2
+t_power = 0.49/2 * 1E-3 #m
+r_copper_power = r_power-t_power
 
 # Signal Cables
 # 28 AWG
-# r_signal = 1.20 * 1E-3 #m
-# t_signal = 0.41 * 1E-3 #m
-# r_copper_signal = r_signal-t_signal
+r_signal = 1.20/2 * 1E-3 #m
+t_signal = 0.41/2 * 1E-3 #m
+r_copper_signal = r_signal-t_signal
 
 # 30 AWG
-r_signal = 0.80/2 * 1E-3 #m
-t_signal = 0.24 * 1E-3 #m
-r_copper_signal = r_signal-t_signal/2
+# r_signal = 0.80/2 * 1E-3 #m
+# t_signal = 0.24 * 1E-3 #m
+# r_copper_signal = r_signal-t_signal/2
 
 
 
@@ -104,7 +104,7 @@ gmsh.model.occ.synchronize()
 
 # Lead jacket generation
 lead_radius_nojacket = 2*r_power/np.sqrt(3)+r_power+2*r_signal
-t_lead_jacket =  0.70 * 1E-3 #m
+t_lead_jacket =  0.50 * 1E-3 #m
 lead_radius = lead_radius_nojacket+t_lead_jacket/2
 print("Total diameter with jacketing (mm): ", 2*lead_radius*1E3)
 
