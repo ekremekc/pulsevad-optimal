@@ -1,0 +1,1 @@
+{"Diameter": 1.046816850374122, "Bending Stiffness": 0.3773284061852123, "Coating Material_C": 0.8679876656299086, "Coating Material_P": -0.795034740832981, "Coating Material_S": 0.7919808803319746, "Coating Material_SS": -0.7550718331403601}
