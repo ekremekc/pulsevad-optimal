@@ -66,14 +66,15 @@ plt.title("Feature Importance in Infection Rate Prediction")
 plt.xlabel("Wire Properties")
 plt.ylabel("Coefficient Value")
 plt.xticks(rotation=45)
+plt.tight_layout()
 plt.savefig("importance.png", dpi=300)
 
-df_predict = pd.DataFrame({
-    'Diameter': [4.8],
-    'Coating_Pellethane': [0],
-    'Coating_polyurethane': [1],
-    'Coating_soft silicone': [0],
-})
+# df_predict = pd.DataFrame({
+#     'Diameter': [4.8],
+#     'Coating_Pellethane': [0],
+#     'Coating_polyurethane': [1],
+#     'Coating_soft silicone': [0],
+# })
 
 # print(model.predict(df_predict))
 

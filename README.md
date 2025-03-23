@@ -13,6 +13,10 @@ conda activate pulsevad
 conda install pip Jinja2
 pip3 install pandas numpy seaborn matplotlib
 conda install -c conda-forge scikit-learn
+conda install -c conda-forge pyomo
+conda install -c conda-forge ipopt glpk
+
+
 ```
 
 Next, we run the following command in order to activate the environment:

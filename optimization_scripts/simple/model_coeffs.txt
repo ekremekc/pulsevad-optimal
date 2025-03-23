@@ -1,0 +1,1 @@
+{"Diameter": 1.0427018532149992, "Bending Stiffness": 0.37949370066416516, "Coating Material_Carbothane": 0.8693346489225977, "Coating Material_Pellethane": -0.8060959407597633, "Coating Material_silicone": 0.8133775654220556, "Coating Material_soft silicone": -0.7715226462920288}
