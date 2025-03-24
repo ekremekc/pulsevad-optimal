@@ -102,3 +102,33 @@ np.savetxt("model_intercept.txt", np.array([model.intercept_]))
 
 # corr = df_encoded.corr()
 # corr.style.background_gradient(cmap='coolwarm')
+
+# === Step 2: Define the grid (e.g., diameter and stiffness) ===
+diameter_range = np.linspace(4.0, 7.0, 50)
+stiffness_range = np.linspace(4.0, 16.0, 50)
+D, S = np.meshgrid(diameter_range, stiffness_range)
+
+# === Step 3: Predict infection rate over the grid ===
+# Fix coating (e.g., choose 'soft silicone')
+fixed_coating = np.array([0, 0, 0, 1])  # assuming one-hot encoding: [Pellethane, silicone, soft silicone]
+
+Z = np.zeros_like(D)
+
+for i in range(D.shape[0]):
+    for j in range(D.shape[1]):
+        diameter = D[i, j]
+        stiffness = S[i, j]
+        
+        # Create the full feature vector for prediction
+        features = np.array([diameter, stiffness, *fixed_coating])
+        Z[i, j] = model.predict([features])[0]
+
+# === Step 4: Plot the heatmap ===
+plt.figure(figsize=(10, 6))
+contour = plt.contourf(D, S, Z, levels=30, cmap='viridis')
+plt.colorbar(contour, label='Predicted Infection Rate (%)')
+plt.xlabel('Diameter (mm)')
+plt.ylabel('Bending Stiffness (N/mm)')
+plt.title('Predicted Infection Rate Heatmap (Coating: soft silicone)')
+plt.tight_layout()
+plt.show()
