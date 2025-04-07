@@ -52,14 +52,14 @@ r_copper_power = r_power-t_power
 
 # Signal Cables
 # 28 AWG
-r_signal = 1.20/2 * 1E-3 #m
-t_signal = 0.41/2 * 1E-3 #m
-r_copper_signal = r_signal-t_signal
+# r_signal = 1.20/2 * 1E-3 #m
+# t_signal = 0.41/2 * 1E-3 #m
+# r_copper_signal = r_signal-t_signal
 
 # 30 AWG
-# r_signal = 0.80/2 * 1E-3 #m
-# t_signal = 0.24 * 1E-3 #m
-# r_copper_signal = r_signal-t_signal/2
+r_signal = 0.80/2 * 1E-3 #m
+t_signal = 0.24 * 1E-3 #m
+r_copper_signal = r_signal-t_signal/2
 
 
 
