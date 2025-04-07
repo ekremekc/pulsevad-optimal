@@ -1,0 +1,16 @@
+Silicone jacket: 
+Estimated Elastic Modulus: 11.740 MPa
+Estimated Elastic Modulus: 10.832 MPa
+Estimated Elastic Modulus: 11.285 MPa
+Averaged Elastic Modulus: 11.285 MPa
+
+Copper conductor: 
+Estimated Elastic Modulus: 70.686 MPa
+Estimated Elastic Modulus: 168.432 MPa
+Estimated Elastic Modulus: 135.385 MPa
+Estimated Elastic Modulus: 162.247 MPa
+Estimated Elastic Modulus: 209.523 MPa
+Averaged Elastic Modulus: 149.254 MPa
+
+Latex: 
+Estimated Elastic Modulus: 1.129 MPa
