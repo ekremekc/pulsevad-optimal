@@ -11,3 +11,9 @@ def flexuralRigidity(E, I):
 
 def flexuralRigidityJacketed(E_o, E_i, d_out, d_in):
     return E_i * momentOfInertia(d_in) + E_o*momentOfInertiaJacket(d_out, d_in)
+
+def area(diameter):
+    return np.pi * diameter**2 / 4
+
+def areaConcentric(d_out, d_in):
+    return np.pi * (d_out**2 - d_in**2) / 4

@@ -1,0 +1,8 @@
+Total diameter with jacketing (mm):  3.823760430703401
+
+Number of 3D cells:  11,359
+Number of 2D cells (facets):  72
+3D XDMF mesh is generated.
+Total bending stiffness (N.m2):  0.0007192353759035122
+Total bending stiffness (N.mm2):  719.2353759035122
+Total bending force (N):  15.34368801927493
