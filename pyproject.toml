@@ -7,7 +7,7 @@ name = "pulsevad"
 version = "1.0.0"
 description = "This is a pulsevad code"
 readme = "README.md"
-requires-python = ">=3.13.2"
+requires-python = ">=3.13.0"
 
 [tool.setuptools.packages.find]
 where = ["src"]
