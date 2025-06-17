@@ -48,18 +48,28 @@ powerJacketTags = copyAndRotate(powerJacket, start_angle, N_power)
 gmsh.model.occ.synchronize()
 
 # Signal domain generation
-# r_lead_nojacket = r_power_ring+r_power+2*r_signal
-# r_signal_ring = r_lead_nojacket-r_signal
-# signalCopper, signalJacket = wireGenerator(r_signal_ring, 0, 0, 0, 0, l_lead, r_copper_signal, r_signal)
-# signalCopperTags = copyAndRotate(signalCopper, start_angle, N_signal)
-# signalJacketTags = copyAndRotate(signalJacket, start_angle, N_signal)
-# gmsh.model.occ.synchronize()
+r_lead_nojacket = r_power_ring+r_power+2*r_signal
+r_signal_ring = r_lead_nojacket-r_signal
+signalCopper, signalJacket = wireGenerator(r_signal_ring, 0, 0, 0, 0, l_lead, r_copper_signal, r_signal)
+signalCopperTags = copyAndRotate(signalCopper, start_angle, N_signal)
+signalJacketTags = copyAndRotate(signalJacket, start_angle, N_signal)
+gmsh.model.occ.synchronize()
 
-# # Lead jacket generation
-# t_lead_jacket =  0.50 * 1E-3 #m
-# r_lead = r_lead_nojacket+t_lead_jacket/2
-# wireJacket = wireGenerator(0,0,0,0,0,l_lead, r_lead_nojacket, r_lead, removeTool=True)
-# print("Total diameter with jacketing (mm): ", 2*r_lead*1E3)
+# Lead jacket generation
+t_lead_jacket =  0.50 * 1E-3 #m
+r_lead = r_lead_nojacket+t_lead_jacket/2
+wireGap, wireJacket = wireGenerator(0,0,0,0,0,l_lead, r_lead_nojacket, r_lead, removeTool=False)
+print("Total diameter with jacketing (mm): ", 2*r_lead*1E3)
+gmsh.model.occ.synchronize()
+
+coppers = powerCopperTags + signalCopperTags 
+jackets = powerJacketTags + signalJacketTags 
+signalCutter = [(3, x) for x in coppers]
+powerCutter = [(3, x) for x in jackets]
+
+gap = gmsh.model.occ.cut(wireGap, signalCutter+powerCutter, removeObject=True, removeTool=False)
+gmsh.model.occ.synchronize()
+
 
 lc = 1E-4
 gmsh.option.setNumber("Mesh.MeshSizeMax", lc)
@@ -72,11 +82,11 @@ gmsh.model.mesh.generate(3)
 gmsh.model.addPhysicalGroup(2, [1], 1) # TODO: build 2D surface tags when necessary
 gmsh.model.addPhysicalGroup(3, powerCopperTags, 1)
 gmsh.model.addPhysicalGroup(3, powerJacketTags, 2)
-# gmsh.model.addPhysicalGroup(3, signalCopperTags, 3)
-# gmsh.model.addPhysicalGroup(3, signalJacketTags, 4)
-# gmsh.model.addPhysicalGroup(3, [wireJacket[0][1]], 5)
+gmsh.model.addPhysicalGroup(3, signalCopperTags, 3)
+gmsh.model.addPhysicalGroup(3, signalJacketTags, 4)
+gmsh.model.addPhysicalGroup(3, [wireJacket[0][1]], 5)
+gmsh.model.addPhysicalGroup(3, [x[1] for x in gap[0]], 6) # air gap
 
-# gmsh.option.setNumber('Mesh.StlOneSolidPerSurface', 1)
 gmsh.write("{}.msh".format(path+mesh_dir+mesh_name))
 # gmsh.write("{}.stl".format(path+mesh_dir+mesh_name))
 
