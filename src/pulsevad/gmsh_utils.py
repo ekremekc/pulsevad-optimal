@@ -50,15 +50,10 @@ def helixWireGenerator(helix_radius, pitch, n_turns, r_inner, r_outer, removeToo
     diskSignal = gmsh.model.occ.addDisk(helix_radius, 0, 0, r_inner, r_inner)
     diskOuter = gmsh.model.occ.addDisk(helix_radius, 0, 0, r_outer, r_outer)
     diskJacket = gmsh.model.occ.cut([(2, diskOuter)], [(2, diskSignal)], removeTool=removeTool)
-    print(diskJacket[0][0][1])
     gmsh.model.occ.synchronize()
-    helixSignal = gmsh.model.occ.addPipe([(2, diskSignal)], helix_wire, 'DiscreteTrihedron')
-    helixJacket = gmsh.model.occ.addPipe([(2, diskJacket[0][0][1])], helix_wire, 'DiscreteTrihedron')
-    print(helixSignal)
-    print(helixJacket)
+
+    helixSignal = gmsh.model.occ.addPipe([(2, diskSignal)], helix_wire, 'Frenet')
+    helixJacket = gmsh.model.occ.addPipe([(2, diskJacket[0][0][1])], helix_wire, 'Frenet')
     gmsh.model.occ.synchronize()
     tags = helixSignal, helixJacket
-
-    # if removeTool:
-    #     tags = Jacket[0]
     return tags
