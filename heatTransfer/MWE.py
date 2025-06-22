@@ -1,12 +1,9 @@
 import gmsh
 import numpy as np
 import sys
-import pandas as pd
-from pulsevad.gmsh_utils import copyAndRotate, helixWireGenerator, wireGenerator
 
 gmsh.initialize()
 gmsh.model.add("spiral_occ")
-gmsh.option.setNumber("General.Antialiasing", 0)
 
 # Power Cables
 d_power = 1.7 * 1E-3 #m
@@ -51,12 +48,14 @@ t_lead_jacket =  0.50 * 1E-3 #m
 r_lead_nojacket = r_power_ring + r_power
 r_lead = r_power_ring + r_power + t_lead_jacket
 
-z_offset = 0
-l_lead = 2*np.pi*pitch*n_turns-2*z_offset
-wireGap, wireJacket = wireGenerator(0,0,z_offset,0,0,l_lead, r_lead_nojacket, r_lead, removeTool=False)
+l_lead = 2*np.pi*pitch*n_turns
+cx, cy, cz, dx, dy, dz = 0,0,0,0,0,l_lead
+wireGap = gmsh.model.occ.add_cylinder(cx, cy, cz, dx, dy, dz, r_lead_nojacket)
+temp = gmsh.model.occ.add_cylinder(cx, cy, cz, dx, dy, dz, r_lead)
+wireJacket = gmsh.model.occ.cut([(3, temp)], [(3, wireGap)], removeTool=False)
 gmsh.model.occ.synchronize()
 
-gap = gmsh.model.occ.cut(wireGap, helixSignal+helixJacket, removeObject=True, removeTool=False)
+gap = gmsh.model.occ.cut([(3, wireGap)], helixSignal+helixJacket, removeObject=True, removeTool=False)
 gmsh.model.occ.synchronize()
 print(gap)
 gmsh.model.occ.removeAllDuplicates()
@@ -69,6 +68,7 @@ lc = 2E-4
 gmsh.option.setNumber("Mesh.MeshSizeMax", lc)
 
 gmsh.model.mesh.generate(3)
+# gmsh.write("geomDir/mwe.brep")
 gmsh.write("geomDir/mwe.stl")
 
 
