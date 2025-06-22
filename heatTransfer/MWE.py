@@ -38,14 +38,12 @@ diskOuter = gmsh.model.occ.addDisk(r_power_ring, 0, 0, r_power, r_power)
 diskJacket = gmsh.model.occ.cut([(2, diskOuter)], [(2, diskSignal)], removeTool=False)
 gmsh.model.occ.synchronize()
 
-helixSignal = gmsh.model.occ.addPipe([(2, diskSignal)], helix_wire, 'Frenet')
-helixJacket = gmsh.model.occ.addPipe([(2, diskJacket[0][0][1])], helix_wire, 'Frenet')
+helixSignal = gmsh.model.occ.addPipe([(2, diskSignal)], helix_wire, 'GuidePlanWithContact')
+helixJacket = gmsh.model.occ.addPipe([(2, diskJacket[0][0][1])], helix_wire, 'GuidePlanWithContact')
 gmsh.model.occ.synchronize()
-gmsh.model.occ.synchronize()
-# print(signalTags, powerTags)
 
 t_lead_jacket =  0.50 * 1E-3 #m
-r_lead_nojacket = r_power_ring + r_power
+r_lead_nojacket = r_power_ring + r_power + 1E-4
 r_lead = r_power_ring + r_power + t_lead_jacket
 
 l_lead = 2*np.pi*pitch*n_turns
@@ -68,6 +66,8 @@ lc = 2E-4
 gmsh.option.setNumber("Mesh.MeshSizeMax", lc)
 
 gmsh.model.mesh.generate(3)
+
+print(gmsh.model.getEntities(3))
 # gmsh.write("geomDir/mwe.brep")
 gmsh.write("geomDir/mwe.stl")
 
