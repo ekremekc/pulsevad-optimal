@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 from pulsevad.gmsh_utils import wireGenerator, copyAndRotate
 from pulsevad.io_utils import write_xdmf_mesh
-mesh_dir = "/geomDir"
+geom_dir = "/geomDir"
+mesh_dir = "/MeshDir"
 mesh_name = "/flat_cable"
 
 gmsh.initialize()
@@ -15,7 +16,12 @@ gmsh.model.add("Geom")
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-l_lead = 1E-4 #m
+pitch = 0.005         # Rise per 2*pi (one full turn)
+n_turns = 1         # Total number of turns
+# l_lead = 2*np.pi*pitch*n_turns
+l_lead = 1e-3
+
+
 N_power = 3
 N_signal = 13
 
@@ -79,7 +85,9 @@ gmsh.option.setNumber("Mesh.Optimize", 1)
 gmsh.option.setNumber("Mesh.OptimizeNetgen", 0)
 gmsh.model.mesh.generate(3)
 
-gmsh.model.addPhysicalGroup(2, [1], 1) # TODO: build 2D surface tags when necessary
+for surface in gmsh.model.getEntities(dim=2):
+    gmsh.model.addPhysicalGroup(2, [surface[1]], tag=surface[1])
+
 gmsh.model.addPhysicalGroup(3, powerCopperTags, 1)
 gmsh.model.addPhysicalGroup(3, powerJacketTags, 2)
 gmsh.model.addPhysicalGroup(3, signalCopperTags, 3)
@@ -87,8 +95,8 @@ gmsh.model.addPhysicalGroup(3, signalJacketTags, 4)
 gmsh.model.addPhysicalGroup(3, [wireJacket[0][1]], 5)
 gmsh.model.addPhysicalGroup(3, [x[1] for x in gap[0]], 6) # air gap
 
+gmsh.write("{}.stl".format(path+geom_dir+mesh_name))
 gmsh.write("{}.msh".format(path+mesh_dir+mesh_name))
-# gmsh.write("{}.stl".format(path+mesh_dir+mesh_name))
 
 if '-nopopup' not in sys.argv:
     gmsh.fltk.run()

@@ -22,3 +22,10 @@ Next, we run the following command in order to activate the environment:
 ```bash
 conda activate pulsevad
 ```
+
+For installinh helezon layer we need dolfinx:
+```bash
+conda install -c conda-forge fenics-dolfinx=0.9.0 pyvista=0.44.1 # Linux and macOS
+# go to helezon directory
+pip3 install -e .
+```
