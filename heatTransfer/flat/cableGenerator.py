@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 from pulsevad.gmsh_utils import wireGenerator, copyAndRotate
 from pulsevad.io_utils import write_xdmf_mesh
+import params
+
+
 geom_dir = "/geomDir"
 mesh_dir = "/MeshDir"
 mesh_name = "/flat_cable"
@@ -19,7 +22,7 @@ path = os.path.dirname(os.path.abspath(__file__))
 pitch = 0.005         # Rise per 2*pi (one full turn)
 n_turns = 1         # Total number of turns
 # l_lead = 2*np.pi*pitch*n_turns
-l_lead = 1e-3
+l_lead = params.l_lead
 
 
 N_power = 3
@@ -75,7 +78,8 @@ powerCutter = [(3, x) for x in jackets]
 
 gap = gmsh.model.occ.cut(wireGap, signalCutter+powerCutter, removeObject=True, removeTool=False)
 gmsh.model.occ.synchronize()
-
+gmsh.model.occ.removeAllDuplicates()
+gmsh.model.occ.synchronize()
 
 lc = 1E-4
 gmsh.option.setNumber("Mesh.MeshSizeMax", lc)
