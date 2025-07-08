@@ -21,13 +21,13 @@ degree = 1
 V = functionspace(mesh, ("Lagrange", degree))
 u = TrialFunction(V)
 
-h1 = 1
+h1 = 500
 T_out = 36.5
 
 # Define the boundary conditions
 boundary_conditions = [
-    # BoundaryCondition("Robin", 221, (h1, T_out), V, facet_tags, u),
-    BoundaryCondition("DirichletValue", 221, T_out, V, facet_tags, u),
+    BoundaryCondition("Robin", 221, (h1, T_out), V, facet_tags, u),
+    # BoundaryCondition("DirichletValue", 221, T_out, V, facet_tags, u),
     # BoundaryCondition("DirichletValue", 15, params.u_edge, V, facet_tags, u),
     # BoundaryCondition("DirichletValue", 17, params.u_edge, V, facet_tags, u),
 ]
