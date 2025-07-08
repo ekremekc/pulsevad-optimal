@@ -5,10 +5,12 @@ import sys
 import pandas as pd
 from pulsevad.gmsh_utils import copyAndRotate, helixWireGenerator, wireGenerator
 from pulsevad.io_utils import write_xdmf_mesh
+import params
 
 path = os.path.dirname(os.path.abspath(__file__))
-mesh_dir = "/geomDir"
-mesh_name = "/spiral_cable"
+geom_dir = "/geomDir"
+mesh_dir = "/MeshDir"
+file_name = "/spiral_cable"
 
 
 gmsh.initialize()
@@ -28,12 +30,13 @@ r_copper_power = r_power-t_power/2
 tol = + 1E-5 # required for successful 3D meshing
 # helix parameters
 r_power_ring = 2*r_power/np.sqrt(3) +tol
-pitch = 0.005         # Rise per 2*pi (one full turn)
-n_turns = 1         # Total number of turns
+pitch = params.pitch         # Rise per 2*pi (one full turn)
+n_turns = params.n_turns         # Total number of turns
 
+N_power = params.N_power
 powerCopperHelix, powerJacketHelix = helixWireGenerator(r_power_ring, pitch, n_turns, r_copper_power, r_power)
-powerCopperTags = copyAndRotate(powerCopperHelix, 0, 3)
-powerJacketTags = copyAndRotate(powerJacketHelix, 0, 3)
+powerCopperTags = copyAndRotate(powerCopperHelix, 0, N_power)
+powerJacketTags = copyAndRotate(powerJacketHelix, 0, N_power)
 gmsh.model.occ.synchronize()
 # print(signalTags, powerTags)
 
@@ -74,7 +77,8 @@ gmsh.model.addPhysicalGroup(3, [leadGap[0][0][1]], 4) # air gap
 # gmsh.model.addPhysicalGroup(3, signalJacketTags, 6)
 
 gmsh.model.mesh.generate(3)
-gmsh.write(path+mesh_dir+mesh_name+".msh")
+gmsh.write(path+geom_dir+file_name+".stl")
+gmsh.write(path+mesh_dir+file_name+".msh")
 gmsh.finalize()
 
-write_xdmf_mesh(path+mesh_dir+mesh_name, 3)
+write_xdmf_mesh(path+mesh_dir+file_name, 3)

@@ -19,14 +19,14 @@ gmsh.model.add("Geom")
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-pitch = 0.005         # Rise per 2*pi (one full turn)
-n_turns = 1         # Total number of turns
+pitch = params.pitch         # Rise per 2*pi (one full turn)
+n_turns = params.n_turns         # Total number of turns
 # l_lead = 2*np.pi*pitch*n_turns
 l_lead = params.l_lead
 
 
-N_power = 3
-N_signal = 13
+N_power = params.N_power
+N_signal = params.N_signal
 
 df = pd.read_csv(path+"/../data/cable_data.csv")
 df = df.set_index("Standard", drop = False)

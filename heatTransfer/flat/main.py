@@ -7,8 +7,11 @@ from helezon.io_utils import xdmf_writer, XDMFReader
 from ufl import TrialFunction
 import numpy as np
 import params
+import os
 
-geometry = XDMFReader("MeshDir/flat_cable")
+path = os.path.dirname(os.path.abspath(__file__))
+
+geometry = XDMFReader(path+"/MeshDir/flat_cable")
 geometry.getInfo()
 
 mesh, subdomains, facet_tags = geometry.getAll()
