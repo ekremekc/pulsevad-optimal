@@ -1,2 +1,2 @@
 python3 spiralCableGenerator.py -nopopup
-mpirun -np 4 python3 main.py
+mpirun -np 1 python3 -u main.py |tee ResultsDir/output.log

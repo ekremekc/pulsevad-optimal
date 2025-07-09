@@ -4,6 +4,7 @@ from helezon.parameter_utils import Q_volumetric
 from helezon.problem import SteadyState
 from helezon.boundary_conditions import BoundaryCondition
 from helezon.io_utils import xdmf_writer, XDMFReader
+from helezon.dolfinx_utils import getFunctionAverage, getFunctionMaximum
 from ufl import TrialFunction
 import numpy as np
 import params
@@ -22,23 +23,23 @@ degree = 1
 V = functionspace(mesh, ("Lagrange", degree))
 u = TrialFunction(V)
 
-h1 = 1
+h1 = 500
 T_out = 36.5
-
+outerSurfaceTag = 27
 # Define the boundary conditions
 boundary_conditions = [
-    # BoundaryCondition("Robin", 27, (h1, T_out), V, facet_tags, u),
-    BoundaryCondition("DirichletValue", 27, T_out, V, facet_tags, u),
+    BoundaryCondition("Robin", outerSurfaceTag, (h1, T_out), V, facet_tags, u),
+    # BoundaryCondition("DirichletValue", outerSurfaceTag, T_out, V, facet_tags, u),
 ]
 
-I_power = 0.25
+I_power = 1#0.25
 R = 0.33*params.l_lead
 N_power = 3
 Q_power = Q_volumetric(mesh, subdomains, Q_total=I_power**2*R * N_power, tag=1, degree=0)
 
-I_signal = 500*1E-6
-N_signal = 13
-Q_signal = Q_volumetric(mesh, subdomains, Q_total=I_signal**2*R * N_signal, tag=3, degree=0)
+# I_signal = 500*1E-6
+# N_signal = 13
+# Q_signal = Q_volumetric(mesh, subdomains, Q_total=I_signal**2*R * N_signal, tag=3, degree=0)
 
 
 # from https://onlinelibrary.wiley.com/doi/pdf/10.1155/2018/5475136 
@@ -65,7 +66,14 @@ kappa.x.scatter_forward()
 
 xdmf_writer("ResultsDir/kappa", mesh, kappa)
 
-problem = SteadyState(V, subdomains, boundary_conditions, kappa, u, Q_list=[Q_power, Q_signal])
+problem = SteadyState(V, subdomains, boundary_conditions, kappa, u, Q_list=[Q_power])
 T = problem.solution
+
+T_avg_surface = getFunctionAverage(mesh, facet_tags, outerSurfaceTag, T, 'facet')
+print("Average temperature on the surface: ", T_avg_surface)
+T_max_surface = getFunctionMaximum(V, T, entity="facet", facet_tags=facet_tags, entityTag=outerSurfaceTag)
+print("Maximum temperature on the surface: ", T_max_surface)
+T_max_body = getFunctionMaximum(V, T)
+print("Maximum temperature on the whole body: ", T_max_body)
 
 xdmf_writer("ResultsDir/T_steady", mesh, T)
