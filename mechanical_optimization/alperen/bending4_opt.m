@@ -73,29 +73,45 @@ EI_inf = EI_0 + sum(parallel_axis_terms);
 %% 6. Optimization of k1 and k2
 % Define a range of forces for the plot
 P_max = 2;  % Maximum Concentrated force at midspan (N) for plotting
-threshold = 0.2 % threshold for bilinear lines
+threshold = 0.15 % threshold for bilinear lines
 N = 500;
 load_range = linspace(0, P_max, N);
+
 % Split numerical data into two
 idx_small_num = load_range < threshold;  % Now using loads for threshold check
-load_range1 = load_range(idx_small_num);
-load_range2 = load_range(~idx_small_num);
-
 % Split experimental data into two
 idx_small = loads < threshold;  % Now using loads for threshold check
 
-% Split the data
+% Optimizing k1
+load_range1 = load_range(idx_small_num);
 loads_small = loads(idx_small);
 displacements_small = displacements(idx_small);
+
+options = optimset('Display', 'iter', 'TolX', 1e-7, 'TolFun', 1e-7, 'MaxIter', 500, 'MaxFunEvals', 1000);
+
+initial_k1_guess = 1e7;
+optimized_k1 = fminsearch(@(k1_val) objective_function_k1(k1_val, E_eff_layers, A_layers, EI_0, EI_inf, h, n, F, P_max, L, load_range1, displacements_small), ...
+                          initial_k1_guess, options);
+
+EI_eff = calc_EI_eff(E_eff_layers, A_layers, EI_0, EI_inf, ...
+                            h, n, F, k1, P_max, L);
+
+displacements_eff = calc_deflection(load_range1, EI_eff, L, F);
+
+
+% Optimizing k2
+
+load_range2 = load_range(~idx_small_num);
 loads_rest = loads(~idx_small);
 displacements_rest = displacements(~idx_small);
 
+
 % ---Optimizing Slip Parameter
-[k1_opt, k2_opt] = optimize_k_values(...
-    displacements_small, loads_small, ...
-    displacements_rest, loads_rest, ...
-    load_range1, load_range2, ...
-    E_eff_layers, A_layers, EI_0, EI_inf, h, n, F, L, P_max)
+% [k1_opt, k2_opt] = optimize_k_values(...
+%     displacements_small, loads_small, ...
+%     displacements_rest, loads_rest, ...
+%     load_range1, load_range2, ...
+%     E_eff_layers, A_layers, EI_0, EI_inf, h, n, F, L, P_max)
 
 % % Initial guess for [k1, k2]
 % k0 = [3e6, 0.1e6];

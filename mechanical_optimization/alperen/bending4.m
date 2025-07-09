@@ -84,9 +84,15 @@ P_max = 2;  % Maximum Concentrated force at midspan (N) for plotting
 P_range = linspace(0, P_max, 100);
 P_range1 = linspace(0, 0.2, 100);
 P_range2 = linspace(0.2, P_max, 100);
+% 
+% [EI_eff, EI_eff2] = calc_ebs(E_eff_layers, A_layers, EI_0, EI_inf, ...
+%                              h, n, F, k1, k2, P_max, L);
 
-[EI_eff, EI_eff2] = calc_ebs(E_eff_layers, A_layers, EI_0, EI_inf, ...
-                             h, n, F, k1, k2, P_max, L);
+EI_eff = calc_EI_eff(E_eff_layers, A_layers, EI_0, EI_inf, ...
+                            h, n, F, k1, P_max, L);
+
+EI_eff2 = calc_EI_eff(E_eff_layers, A_layers, EI_0, EI_inf, ...
+                            h, n, F, k2, P_max, L);
 
 deflection_eff = calc_deflection(P_range1, EI_eff, L, F);
 deflection_eff2 = calc_deflection(P_range2, EI_eff2, L, F);
