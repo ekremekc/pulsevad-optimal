@@ -70,39 +70,63 @@ d_parallel_axis = y_centroids - y_bar;
 parallel_axis_terms = EA_products .* (d_parallel_axis.^2);
 EI_inf = EI_0 + sum(parallel_axis_terms);
 
-%% 6. Calculating EBC
-% --- Slip Parameter
-% This is a crucial parameter that must be calibrated from experiments.
-% See Fig. 6 in the reference paper for guidance (k = 7.26*sigma + 46.5).
-k1 = 3;
-k2 = 0.15; % Slip Rigidity (MPa), converted to Pa in the script
-k1 = k1 * 1e6; % Convert MPa to Pa
-k2 = k2 * 1e6;
-
+%% 6. Optimization of k1 and k2
 % Define a range of forces for the plot
 P_max = 2;  % Maximum Concentrated force at midspan (N) for plotting
-P_range = linspace(0, P_max, 100);
-P_range1 = linspace(0, 0.2, 100);
-P_range2 = linspace(0.2, P_max, 100);
+threshold = 0.2 % threshold for bilinear lines
+N = 500;
+load_range = linspace(0, P_max, N);
+% Split numerical data into two
+idx_small_num = load_range < threshold;  % Now using loads for threshold check
+load_range1 = load_range(idx_small_num);
+load_range2 = load_range(~idx_small_num);
+
+% Split experimental data into two
+idx_small = loads < threshold;  % Now using loads for threshold check
+
+% Split the data
+loads_small = loads(idx_small);
+displacements_small = displacements(idx_small);
+loads_rest = loads(~idx_small);
+displacements_rest = displacements(~idx_small);
+
+% ---Optimizing Slip Parameter
+[k1_opt, k2_opt] = optimize_k_values(...
+    displacements_small, loads_small, ...
+    displacements_rest, loads_rest, ...
+    load_range1, load_range2, ...
+    E_eff_layers, A_layers, EI_0, EI_inf, h, n, F, L, P_max)
+
+% % Initial guess for [k1, k2]
+% k0 = [3e6, 0.1e6];
+% % Objective function wrapper
+% cost_fun = @(k) objective_k1k2(k, loads_small, displacements_small, ...
+%                                 loads_rest, displacements_rest, ...
+%                                 E_eff_layers, A_layers, EI_0, EI_inf, ...
+%                                 h, n, F, L, P_max);
+% k_opt = fminsearch(cost_fun, k0);
+% k1_opt = k_opt(1)
+% k2_opt = k_opt(2)
+
 
 [EI_eff, EI_eff2] = calc_ebs(E_eff_layers, A_layers, EI_0, EI_inf, ...
-                             h, n, F, k1, k2, P_max, L);
+                             h, n, F, k1_opt, k2_opt, P_max, L);
 
-deflection_eff = calc_deflection(P_range1, EI_eff, L, F);
-deflection_eff2 = calc_deflection(P_range2, EI_eff2, L, F);
+deflection_eff = calc_deflection(load_range1, EI_eff, L, F);
+deflection_eff2 = calc_deflection(load_range2, EI_eff2, L, F);
 
 %% 7. Plot Load-Deflection Curves
 disp('--- Generating Plot ---');
 
-deflection_inf = calc_deflection(P_range, EI_inf, L, F);
-deflection_0 = calc_deflection(P_range, EI_0, L, F);
+deflection_inf = calc_deflection(load_range, EI_inf, L, F);
+deflection_0 = calc_deflection(load_range, EI_0, L, F);
 % Create the plot
 figure;
-plot(deflection_inf * 1000, P_range, 'b--', 'LineWidth', 1.5);
+plot(deflection_inf * 1000, load_range, 'b--', 'LineWidth', 1.5);
 hold on;
-plot(deflection_eff * 1000, P_range1, 'r-', 'LineWidth', 2);
-plot(deflection_eff2 * 1000-1.46, P_range2, 'r--', 'LineWidth', 2);
-plot(deflection_0 * 1000, P_range, 'g--', 'LineWidth', 1.5);
+plot(deflection_eff * 1000, load_range1, 'r-', 'LineWidth', 2);
+plot(deflection_eff2 * 1000-1.46, load_range2, 'r--', 'LineWidth', 2);
+plot(deflection_0 * 1000, load_range, 'g--', 'LineWidth', 1.5);
 plot(displacements, loads, '-o', 'LineWidth', 1)
 hold off;
 % Formatting
