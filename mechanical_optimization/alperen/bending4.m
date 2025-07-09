@@ -1,0 +1,185 @@
+% MATLAB Code for Bending Stiffness of a 7-Wire Strand
+% Implements the method from Zhang et al. (2018)
+% "Bending Stiffness of Parallel Wire Cables Including Interfacial Slips among Wires"
+
+clear; clc; close all;
+load hm3_data.mat
+loads = mean([load_1' load_2' load_3'],2);
+displacements = mean([disp_1' disp_2' disp_3'],2);
+loads = loads(2:end);
+displacements = displacements(2:end);
+%% 1. User-Defined Parameters
+% Define the material, geometric, and loading properties.
+
+% --- Geometry
+d_wire = 0.0008; % Wire Diameter (m)
+
+% --- Material Properties
+E_center = 3e8; % Elasticity Modulus of the central wire (Pa)
+E_outer = 10e9;  % Elasticity Modulus of the outer wires (Pa)
+
+% --- Experimental Setup
+L = 96/1000; % Cable Span (m) for simply supported beam setup
+F = 0; % Axial Tensile Force (N)
+P_max = 2;  % Maximum Concentrated force at midspan (N) for plotting
+
+% --- Slip Parameter
+% This is a crucial parameter that must be calibrated from experiments.
+% See Fig. 6 in the reference paper for guidance (k = 7.26*sigma + 46.5).
+k1 = 3;
+k2 = 0.15; % Slip Rigidity (MPa), converted to Pa in the script
+k1 = k1 * 1e6; % Convert MPa to Pa
+k2 = k2 * 1e6;
+
+%% 2. Geometry Calculation based on Hexagonal Packing
+% For a 7-wire strand, there is 1 central wire and 6 outer wires.
+
+r_wire = d_wire / 2;
+A_wire = pi * r_wire^2;
+
+%% 3. Laminated Beam Idealization (as per the referenced paper)
+% The cross-section is idealized into 3 rectangular layers.
+% - Layer 1 (top): 2 outer wires
+% - Layer 2 (middle): 1 central wire + 2 outer wires
+% - Layer 3 (bottom): 2 outer wires
+
+H = d_wire * (1 + sqrt(3)); % Total height of the section
+n = 3; % Number of layers
+h = H / n; % Height of each idealized layer
+
+A_layer1 = 2 * A_wire;
+A_layer2 = 3 * A_wire;
+A_layer3 = 2 * A_wire;
+A_layers = [A_layer1; A_layer2; A_layer3];
+
+b_layers = A_layers / h; % Equivalent width of each layer
+
+%% 4. Layer Stiffness and Limiting Bending Stiffness (EI_0 and EI_inf)
+
+% --- Effective Elastic Modulus for each layer (Pa)
+E_eff_layer1 = E_outer;
+E_eff_layer2 = (E_center * A_wire + E_outer * 2 * A_wire) / (3 * A_wire);
+E_eff_layer3 = E_outer;
+E_eff_layers = [E_eff_layer1; E_eff_layer2; E_eff_layer3];
+
+% --- Moment of Inertia for each idealized RECTANGULAR layer (m^4)
+I_rect_layers = (b_layers .* h^3) / 12;
+
+% --- Bending stiffness (EI) of each idealized layer (Nm^2)
+EI_layers = E_eff_layers .* I_rect_layers;
+
+% --- Full-Slip Bending Stiffness, EI_0 (Nm^2)
+EI_0 = sum(EI_layers);
+
+% --- No-Slip (Perfect Bonding) Bending Stiffness, EI_inf (Nm^2)
+y_centroids = [2.5*h; 1.5*h; 0.5*h]; % From bottom of section
+EA_products = E_eff_layers .* A_layers;
+y_bar = sum(EA_products .* y_centroids) / sum(EA_products);
+d_parallel_axis = y_centroids - y_bar;
+parallel_axis_terms = EA_products .* (d_parallel_axis.^2);
+EI_inf = EI_0 + sum(parallel_axis_terms);
+
+%% 5. Effective Bending Stiffness (EBS) Calculation
+% This section implements the core equations from the paper to find EI_eff.
+
+% --- Intermediate Parameters (alpha^2 and beta^2 from Eq. 18)
+% For a symmetric 3-layer beam, slip is symmetric (delta_u1 = delta_u2),
+% so we assume eta_1 = 1 and eta_2 = 1.
+eta_1 = 1;
+eta_2 = 1;
+eta_0 = eta_1 + eta_2; %
+
+% Axial stiffness of the n-th layer (n=3)
+EA_n = E_eff_layers(n) * A_layers(n);
+
+alpha_sq = k1 * ( ((n-1)*h^2 / EI_0) + (2 / (EA_n * eta_0)) );
+beta_sq = (2 * k1 * EI_inf) / (EA_n * EI_0 * eta_0); 
+alpha_sq2 = k2 * ( ((n-1)*h^2 / EI_0) + (2 / (EA_n * eta_0)) );
+beta_sq2 = (2 * k2 * EI_inf) / (EA_n * EI_0 * eta_0); 
+
+% --- Characteristic Equation Roots (lambda_1 and lambda_2 from Eq. 22)
+% Add a small epsilon to F to prevent division by zero if F=0.
+if F == 0; F = 1e-6; end
+
+term_under_sqrt = (alpha_sq + F/EI_0)^2 - 4*beta_sq*F/EI_inf;
+term_under_sqrt2 = (alpha_sq2 + F/EI_0)^2 - 4*beta_sq2*F/EI_inf;
+% Check if the term is negative (can happen for very low F or k)
+if term_under_sqrt < 0
+    warning('Term under square root is negative. Check F and k values. Setting to zero.');
+    term_under_sqrt = 0;
+end
+
+lambda_1 = sqrt(0.5 * (alpha_sq + F/EI_0) + 0.5 * sqrt(term_under_sqrt));
+lambda_2 = sqrt(0.5 * (alpha_sq + F/EI_0) - 0.5 * sqrt(term_under_sqrt)); 
+lambda_12 = sqrt(0.5 * (alpha_sq2 + F/EI_0) + 0.5 * sqrt(term_under_sqrt2));
+lambda_22 = sqrt(0.5 * (alpha_sq2 + F/EI_0) - 0.5 * sqrt(term_under_sqrt2)); 
+
+% --- Maximum Deflection Calculation (for concentrated midspan load P)
+
+% Max deflection with slip (w_max_2 from Eq. 32)
+term1_w_slip = (P_max*L)/(4*F);
+% Avoid division by zero if lambda values are identical
+if abs(lambda_1 - lambda_2) < 1e-9
+    term2_w_slip = 0;
+    term3_w_slip = 0;
+else
+    term2_w_slip = (P_max/(2*F)) * ((F/EI_0 - lambda_2^2) / (lambda_1 * (lambda_2^2 - lambda_1^2))) * tanh(lambda_1*L/2);
+    term3_w_slip = (P_max/(2*F)) * ((F/EI_0 - lambda_1^2) / (lambda_2 * (lambda_2^2 - lambda_1^2))) * tanh(lambda_2*L/2);
+    term2_w_slip2 = (P_max/(2*F)) * ((F/EI_0 - lambda_22^2) / (lambda_12 * (lambda_22^2 - lambda_12^2))) * tanh(lambda_12*L/2);
+    term3_w_slip2 = (P_max/(2*F)) * ((F/EI_0 - lambda_12^2) / (lambda_22 * (lambda_22^2 - lambda_12^2))) * tanh(lambda_22*L/2);
+end
+w_max_2 = term1_w_slip + term2_w_slip - term3_w_slip; 
+w_max_22 = term1_w_slip + term2_w_slip2 - term3_w_slip2; 
+
+% Max deflection without slip (w_bar_max_2 from Eq. 33)
+alpha_0 = sqrt(F/EI_inf);
+w_bar_max_2 = (P_max*L)/(4*F) - (P_max/(2*alpha_0*F)) * tanh(alpha_0*L/2); 
+% --- Deflection Magnification Coefficient (delta_2 from Eq. 34)
+delta_2 = w_max_2 / w_bar_max_2;
+delta_22 = w_max_22 / w_bar_max_2; 
+
+% --- Final Effective Bending Stiffness (EI_eff from Eq. 35)
+EI_eff = (1 / delta_2) * EI_inf;
+EI_eff2 = (1 / delta_22) * EI_inf;
+
+%% 6. Display Results
+disp('--- Bending Stiffness Results ---');
+fprintf('Full-Slip Bending Stiffness (EI_0):     %.2f Nm^2\n', EI_0);
+fprintf('No-Slip Bending Stiffness (EI_inf):   %.2f Nm^2\n', EI_inf);
+fprintf('Effective Bending Stiffness (EI_eff): %.2f Nm^2\n', EI_eff);
+fprintf('Effective Bending Stiffness 2 (EI_eff2): %.2f Nm^2\n', EI_eff);
+fprintf('\n(Stiffness ratio EI_eff / EI_inf: %.3f)\n', EI_eff/EI_inf);
+fprintf('\n(Stiffness ratio 2 EI_eff2 / EI_inf: %.3f)\n', EI_eff/EI_inf);
+
+%% 7. Plot Load-Deflection Curves
+disp('--- Generating Plot ---');
+
+% Define a range of forces for the plot
+P_range = linspace(0, P_max, 100);
+P_range1 = linspace(0, 0.2, 100);
+P_range2 = linspace(0.2, P_max, 100);
+
+% Define a function for calculating deflection based on the general formula
+% for a beam-column with a midspan load P and stiffness EI.
+calc_deflection = @(p_vec, EI) (p_vec*L)/(4*F) - (p_vec./(2*F*sqrt(F./EI))) .* tanh(sqrt(F./EI)*L/2);
+% Calculate deflection for each stiffness case
+deflection_inf = calc_deflection(P_range, EI_inf);
+deflection_eff = calc_deflection(P_range1, EI_eff);
+deflection_eff2 = calc_deflection(P_range2, EI_eff2);
+deflection_0 = calc_deflection(P_range, EI_0);
+% Create the plot
+figure;
+plot(deflection_inf * 1000, P_range, 'b--', 'LineWidth', 1.5);
+hold on;
+plot(deflection_eff * 1000, P_range1, 'r-', 'LineWidth', 2);
+plot(deflection_eff2 * 1000-1.46, P_range2, 'r--', 'LineWidth', 2);
+plot(deflection_0 * 1000, P_range, 'g--', 'LineWidth', 1.5);
+plot(displacements, loads, '-o', 'LineWidth', 1)
+hold off;
+% Formatting
+title('Load-Deflection Curve for 7-Wire Strand');
+xlabel('Midspan Deflection (mm)');
+ylabel('Concentrated Load (N)');
+legend('No-Slip (EI_{inf})', 'Effective (EI_{eff})', 'Effective (EI_{eff2})','Full-Slip (EI_0)', 'Experimental', 'Location', 'southeast');
+grid on;
+set(gca, 'FontSize', 12);
