@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from pulsevad.gmsh_utils import wireGenerator, copyAndRotate
 from pulsevad.io_utils import write_xdmf_mesh
+from importlib import resources
 import params
 
 path = os.path.dirname(os.path.abspath(__file__))
@@ -16,10 +17,9 @@ gmsh.initialize()
 gmsh.model.add("Geom")
 gmsh.option.setNumber("General.Terminal", 0)
 
-df = pd.read_csv(path+"/../data/cable_data.csv")
+with resources.files('pulsevad.data').joinpath('cable_data.csv').open('r') as f:
+    df = pd.read_csv(f)
 df = df.set_index("Standard", drop = False)
-
-
 
 # Power Cables
 powerCable = "22AWG"

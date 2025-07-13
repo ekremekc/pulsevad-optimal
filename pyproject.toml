@@ -14,3 +14,6 @@ where = ["src"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+"pulsevad.data" = ["cable_data.csv"]
