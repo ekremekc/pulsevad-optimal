@@ -33,7 +33,7 @@ boundary_conditions = [
 ]
 
 I_power = 1#0.25
-R = 0.33*params.l_lead
+R = 0.33*params.length
 N_power = 3
 Q_power = Q_volumetric(mesh, subdomains, Q_total=I_power**2*R * N_power, tag=1, degree=0)
 
