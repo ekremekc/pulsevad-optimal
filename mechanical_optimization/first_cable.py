@@ -4,7 +4,9 @@ import sys
 import numpy as np
 import pandas as pd
 from pulsevad.gmsh_utils import wireGenerator, copyAndRotate
+from importlib import resources
 from pulsevad.io_utils import write_xdmf_mesh
+
 mesh_dir = "/geomDir"
 mesh_name = "/first_cable"
 
@@ -19,7 +21,8 @@ l_lead = 1E-4 #m
 N_power = 3
 N_signal = 10
 
-df = pd.read_csv("cable_data.csv")
+with resources.files('pulsevad.data').joinpath('cable_data.csv').open('r') as f:
+    df = pd.read_csv(f)
 df = df.set_index("Standard", drop = False)
 
 # Power Cables

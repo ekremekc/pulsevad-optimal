@@ -1,0 +1,21 @@
+89
+
+XDMF Mesh - Cell data loaded.
+XDMF Mesh - Facet data loaded.
+Number of cells:  146,935
+Number of cores:  1 
+
+Number of cells:  146,935
+Number of cores:  1 
+
+
+- Steady state problem is assembled.
+
+- Starting the solution..
+- Solution is converged.
+
+Total execution time:  0:00:02.391466 
+
+Average temperature on the surface:  36.72654805363245
+Maximum temperature on the surface:  36.788012546203674
+Maximum temperature on the whole body:  37.82529089308387
