@@ -14,7 +14,7 @@ encoder = OneHotEncoder(sparse_output=False)
 coating_encoded = encoder.fit_transform(df[['Coating Material']])
 coating_columns = encoder.get_feature_names_out(['Coating Material'])
 
-print(coating_encoded)
+# print(coating_encoded)
 
 
 # Merge Encoded Data
@@ -56,11 +56,21 @@ print(coef_df)
 
 # Step 8: Plot all feature effects
 plt.figure(figsize=(8, 5))
-sns.barplot(x='Coefficient', y='Feature', data=coef_df, palette='coolwarm')
-plt.axvline(0, linestyle='--', color='gray')
-plt.title('Effect of Features on Infection Rate')
+sns.barplot(
+    x='Coefficient',
+    y='Feature',
+    data=coef_df[coef_df['Coefficient'] != 0],  # filter out
+    palette='RdBu',
+    edgecolor='black'
+)
+plt.axvline(0, linestyle='--', color='gray', linewidth=1)
+# plt.title('Effect of Features on Infection Rate', fontsize=14)
+plt.xlabel('Coefficient', fontsize=12)
+plt.ylabel('Feature', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
 plt.tight_layout()
-plt.savefig("data_driven_importance.png", dpi=300)
+plt.savefig("impact_mechanical.png", dpi=300, bbox_inches='tight')  # bbox_inches trims whitespace
 # plt.show()
 
 # save model coefficients
