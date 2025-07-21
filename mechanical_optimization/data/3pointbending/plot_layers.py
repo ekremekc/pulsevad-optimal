@@ -109,9 +109,9 @@ plt.show()
 plt.close()
 
 # 5
-twoPath1 = 'hm3/5/test1.txt'
-twoPath2 = 'hm3/5/test2.txt'
-twoPath3 = 'hm3/5/test3.txt'
+twoPath1 = 'hm3/5b/test1.txt'
+twoPath2 = 'hm3/5b/test2.txt'
+twoPath3 = 'hm3/5b/test3.txt'
 
 disp_1, load_1 = readData(twoPath1, max_disp=4) 
 disp_2, load_2 = readData(twoPath2, max_disp=4) 
@@ -127,7 +127,7 @@ plt.ylim(0, 1)
 plt.legend()
 plt.grid()
 plt.tight_layout()
-plt.savefig("plots/layers/5.png", dpi=300)
+plt.savefig("plots/layers/5b.png", dpi=300)
 plt.show()
 plt.close()
 
