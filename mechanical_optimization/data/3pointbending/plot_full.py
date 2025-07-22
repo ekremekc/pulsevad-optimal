@@ -2,8 +2,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.rcParams.update({'font.size': 18})
+from matplotlib.ticker import FuncFormatter
 
+# Define global formatter
+formatter = FuncFormatter(lambda y, _: f'{y:.2f}')
+matplotlib.rcParams.update({'font.size': 18})
+matplotlib.rcParams['lines.linewidth'] = 3  # Set global line width
+
+fig_size = (6, 4)
 column_names = ['Load (N)', 'Machine Extension (mm)']
 
 def readData(path):
@@ -29,10 +35,10 @@ disp_1, load_1 = readData(hm3Path1)
 disp_2, load_2 = readData(hm3Path2) 
 disp_3, load_3 = readData(hm3Path3) 
 
-plt.figure(figsize=(6, 6))
-plt.plot(disp_1, load_1, label='test 1')
-plt.plot(disp_2, load_2, label='test 2')
-plt.plot(disp_3, load_3, label='test 3')
+plt.figure(figsize=fig_size)
+plt.plot(disp_1, load_1, label='I')
+plt.plot(disp_2, load_2, label='II')
+plt.plot(disp_3, load_3, label='III')
 plt.xlabel('Displacement (mm)')
 plt.ylabel('Load (N)')
 plt.ylim(0, 2)
@@ -52,10 +58,10 @@ disp_1, load_1 = readData(HVADPath1)
 disp_2, load_2 = readData(HVADPath2) 
 disp_3, load_3 = readData(HVADPath3) 
 
-plt.figure(figsize=(6, 6))
-plt.plot(disp_1, load_1, label='test 1')
-plt.plot(disp_2, load_2, label='test 2')
-plt.plot(disp_3, load_3, label='test 3')
+plt.figure(figsize=fig_size)
+plt.plot(disp_1, load_1, label='I')
+plt.plot(disp_2, load_2, label='II')
+plt.plot(disp_3, load_3, label='III')
 plt.xlabel('Displacement (mm)')
 plt.ylabel('Load (N)')
 plt.ylim(0, 2)
@@ -76,8 +82,8 @@ plt.close()
 # disp_3, load_3 = readData(VentrassistPath3) 
 
 # plt.plot(disp_1, load_1, label='test 1')
-# plt.plot(disp_2, load_2, label='test 2')
-# plt.plot(disp_3, load_3, label='test 3')
+# plt.plot(disp_2, load_2, label='II')
+# plt.plot(disp_3, load_3, label='III')
 # plt.xlabel('Displacement (mm)')
 # plt.ylabel('Load (N)')
 # plt.ylim(0, 4)
