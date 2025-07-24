@@ -1,82 +1,61 @@
 import pandas as pd
+from sklearn.linear_model import Ridge
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import mean_squared_error
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.linear_model import LinearRegression, BayesianRidge
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.metrics import mean_squared_error, r2_score
-import json 
 
+# Load your dataset
 df = pd.read_csv("data.csv")
 
-# One-Hot Encoding for Categorical Variable
-encoder = OneHotEncoder(sparse_output=False)
-coating_encoded = encoder.fit_transform(df[['Coating Material']])
-coating_columns = encoder.get_feature_names_out(['Coating Material'])
+# Features and target
+X = df[["Diameter", "Bending Stiffness", "Coating Material"]]
+y = df["Infection Rate"]
+sample_weights = df["Sample size"]
 
-print(coating_encoded)
+# Preprocess: scale numeric + one-hot encode categorical
+preprocessor = ColumnTransformer([
+    ("num", StandardScaler(), ["Diameter", "Bending Stiffness"]),
+    ("cat", OneHotEncoder(drop="first"), ["Coating Material"])
+])
+
+from sklearn.linear_model import RidgeCV
+
+ridge_cv_model = make_pipeline(
+    preprocessor,
+    RidgeCV(alphas=[0.01, 0.1, 1.0, 10.0, 100.0], scoring='neg_mean_squared_error', cv=5)
+)
+ridge_cv_model.fit(X, y, ridgecv__sample_weight=sample_weights)
+print("Best alpha:", ridge_cv_model.named_steps["ridgecv"].alpha_)
 
 
-# Merge Encoded Data
-df_encoded = pd.concat([df.drop(columns=['Coating Material']), pd.DataFrame(coating_encoded, columns=coating_columns)], axis=1)
+# Ridge regression pipeline
+model = make_pipeline(preprocessor, Ridge(alpha=ridge_cv_model.named_steps["ridgecv"].alpha_))
 
-# Define Features and Target Variable
-sample_weights=df["Sample size"]
-X = df_encoded.drop(columns=['Device','Infection Rate', 'Sample size'])
-y = df_encoded['Infection Rate']
+# Fit the model with sample weights
+model.fit(X, y, ridge__sample_weight=sample_weights)
 
-# Train the Regression Model
-model = BayesianRidge(fit_intercept=False)
-model.fit(X, y, sample_weight=sample_weights)
-
-# Predictions
+# Predict
 y_pred = model.predict(X)
 
-# Model Evaluation
-mse = mean_squared_error(y, y_pred)
-r2 = r2_score(y, y_pred)
-print("Mean Squared Error:", mse)
-print("R-Squared Value:", r2)
-print("Intercept:", model.intercept_)
+# Evaluation
+rmse = mean_squared_error(y, y_pred, sample_weight=sample_weights)
+print(f"Weighted RMSE: {rmse:.3f}")
 
-feature_names = X.columns
-coefficients = model.coef_
-coef_df = pd.DataFrame({'Feature': feature_names, 'Coefficient': coefficients})
+# Coefficients
+ridge_model = model.named_steps["ridge"]
+feature_names = model.named_steps["columntransformer"].get_feature_names_out()
+coefs = pd.Series(ridge_model.coef_, index=feature_names)
 
-# Step 6: Add baseline coating info
-baseline_coating = sorted(df['Coating Material'].unique())[0]
-coef_df = pd.concat([
-    pd.DataFrame({'Feature': [f'Coating Material_{baseline_coating}'], 'Coefficient': [0.0]}),
-    coef_df
-], ignore_index=True)
+print("\nRidge Regression Coefficients:")
+print(coefs)
 
-# Step 7: Display results
-print("\n=== Linear Regression Coefficients ===")
-print(coef_df)
+import matplotlib.pyplot as plt
 
-# Step 8: Plot all feature effects
-plt.figure(figsize=(8, 5))
-sns.barplot(x='Coefficient', y='Feature', data=coef_df, palette='coolwarm')
-plt.axvline(0, linestyle='--', color='gray')
-plt.title('Effect of Features on Infection Rate')
-plt.tight_layout()
-# plt.savefig("data_driven_importance.png", dpi=300)
+plt.scatter(y, y_pred, s=sample_weights/10, alpha=0.6)
+plt.plot([y.min(), y.max()], [y.min(), y.max()], '--r')
+plt.xlabel("Actual Infection Rate")
+plt.ylabel("Predicted Infection Rate")
+plt.title("Predicted vs. Actual")
 plt.show()
-
-# # save model coefficients
-# coeffs = dict(zip(X.columns, model.coef_))
-# with open('model_coeffs.txt', 'w') as convert_file: 
-#      convert_file.write(json.dumps(coeffs))
-# np.savetxt("model_intercept.txt", np.array([model.intercept_]))
-
-# df_predict = pd.DataFrame({
-#     'Diameter': [4.8],
-#     'Coating_Pellethane': [0],
-#     'Coating_polyurethane': [1],
-#     'Coating_soft silicone': [0],
-# })
-
-# print(model.predict(df_predict))
-
-# corr = df_encoded.corr()
-# corr.style.background_gradient(cmap='coolwarm')
