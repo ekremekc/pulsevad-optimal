@@ -5,6 +5,7 @@ import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.ensemble import RandomForestRegressor
 import json 
 
 df = pd.read_csv("data.csv")
@@ -27,6 +28,7 @@ y = df_encoded['Infection Rate']
 
 # Train the Regression Model
 model = LinearRegression(fit_intercept=False)
+# model = RandomForestRegressor()
 model.fit(X, y, sample_weight=sample_weights)
 
 # Predictions
@@ -79,14 +81,10 @@ with open('model_coeffs.txt', 'w') as convert_file:
      convert_file.write(json.dumps(coeffs))
 np.savetxt("model_intercept.txt", np.array([model.intercept_]))
 
-# df_predict = pd.DataFrame({
-#     'Diameter': [4.8],
-#     'Coating_Pellethane': [0],
-#     'Coating_polyurethane': [1],
-#     'Coating_soft silicone': [0],
-# })
+import statsmodels.api as sm
+X_encoded = pd.get_dummies(X, drop_first=True)
+X_encoded = sm.add_constant(X_encoded)
 
-# print(model.predict(df_predict))
-
-# corr = df_encoded.corr()
-# corr.style.background_gradient(cmap='coolwarm')
+model = sm.OLS(y, X_encoded, weights=sample_weights).fit()
+# model = sm.WLS(y, X_encoded, weights=sample_weights).fit()
+print(model.summary())

@@ -1,0 +1,31 @@
+                            WLS Regression Results                            
+==============================================================================
+Dep. Variable:         Infection Rate   R-squared:                       0.161
+Model:                            WLS   Adj. R-squared:                  0.064
+Method:                 Least Squares   F-statistic:                     1.659
+Date:                Thu, 24 Jul 2025   Prob (F-statistic):              0.200
+Time:                        16:40:35   Log-Likelihood:                -90.183
+No. Observations:                  30   AIC:                             188.4
+Df Residuals:                      26   BIC:                             194.0
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+=======================================================================================
+                          coef    std err          t      P>|t|      [0.025      0.975]
+---------------------------------------------------------------------------------------
+Diameter                1.0518      0.265      3.973      0.001       0.508       1.596
+Bending Stiffness       0.3902      0.115      3.391      0.002       0.154       0.627
+Coating Material_C      0.7343      3.065      0.240      0.813      -5.565       7.034
+Coating Material_P     -1.0197      1.259     -0.810      0.425      -3.608       1.569
+Coating Material_PV    -0.8434      1.301     -0.648      0.523      -3.518       1.831
+Coating Material_WP     1.2471      2.540      0.491      0.628      -3.974       6.468
+==============================================================================
+Omnibus:                        3.002   Durbin-Watson:                   1.718
+Prob(Omnibus):                  0.223   Jarque-Bera (JB):                1.696
+Skew:                           0.522   Prob(JB):                        0.428
+Kurtosis:                       3.518   Cond. No.                     1.09e+17
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The smallest eigenvalue is 4.65e-29. This might indicate that there are
+strong multicollinearity problems or that the design matrix is singular.
