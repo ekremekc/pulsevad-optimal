@@ -1,0 +1,26 @@
+                                 WLS Regression Results                                
+=======================================================================================
+Dep. Variable:         Infection Rate   R-squared (uncentered):                   0.863
+Model:                            WLS   Adj. R-squared (uncentered):              0.853
+Method:                 Least Squares   F-statistic:                              88.33
+Date:                Fri, 01 Aug 2025   Prob (F-statistic):                    8.04e-13
+Time:                        21:31:53   Log-Likelihood:                         -90.516
+No. Observations:                  30   AIC:                                      185.0
+Df Residuals:                      28   BIC:                                      187.8
+Df Model:                           2                                                  
+Covariance Type:            nonrobust                                                  
+=====================================================================================
+                        coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------
+Diameter              0.9371      0.180      5.192      0.000       0.567       1.307
+Bending Stiffness     0.3758      0.116      3.244      0.003       0.138       0.613
+==============================================================================
+Omnibus:                        2.850   Durbin-Watson:                   1.620
+Prob(Omnibus):                  0.241   Jarque-Bera (JB):                1.515
+Skew:                           0.446   Prob(JB):                        0.469
+Kurtosis:                       3.645   Cond. No.                         3.35
+==============================================================================
+
+Notes:
+[1] R² is computed without centering (uncentered) since the model does not contain a constant.
+[2] Standard Errors assume that the covariance matrix of the errors is correctly specified.
